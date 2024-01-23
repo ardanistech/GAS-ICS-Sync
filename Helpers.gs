@@ -397,8 +397,9 @@ function createEvent(event, calendarTz){
     };
   }
 
-  if (addAttendees && event.hasProperty('attendee')){
-    newEvent.attendees = [];
+  newEvent.attendees = [];
+
+  if (addAttendees && event.hasProperty('attendee')){ 
     for (var att of icalEvent.attendees){
       var mail = parseAttendeeMail(att.toICALString());
       if (mail != null){
@@ -415,6 +416,11 @@ function createEvent(event, calendarTz){
         newEvent.attendees.push(newAttendee);
       }
     }
+  }
+
+  if (duplicateInMyCal) {
+    var newAttendee = {'email' : myCal };
+    newEvent.attendees.push(newAttendee);
   }
 
   if (event.hasProperty('status')){
@@ -456,8 +462,8 @@ function createEvent(event, calendarTz){
     }
   }
 
-  if (addCalToTitle && event.hasProperty('parentCal')){
-    var calName = event.getFirstPropertyValue('parentCal');
+  if (addCalToTitle){
+    var calName = targetCalendarName;
     newEvent.summary = "(" + calName + ") " + newEvent.summary;
   }
 
@@ -844,13 +850,6 @@ function parseRecurrenceRule(vevent, utcOffset){
 
   var recurrence = [];
   for (var recRule of recurrenceRules){
-    if (recRule.getParameter('tzid')){
-      let tz = recRule.getParameter('tzid').toString();
-      if (tz in tzidreplace){
-        tz = tzidreplace[tz];
-      }
-      recRule.setParameter('tzid', tz);
-    }
     var recIcal = recRule.toICALString();
     var adjustedTime;
 
@@ -865,35 +864,14 @@ function parseRecurrenceRule(vevent, utcOffset){
   }
 
   for (var exRule of exRules){
-    if (exRule.getParameter('tzid')){
-      let tz = exRule.getParameter('tzid').toString();
-      if (tz in tzidreplace){
-        tz = tzidreplace[tz];
-      }
-      exRule.setParameter('tzid', tz);
-    }
     recurrence.push(exRule.toICALString());
   }
 
   for (var exDate of exDates){
-    if (exDate.getParameter('tzid')){
-      let tz = exDate.getParameter('tzid').toString();
-      if (tz in tzidreplace){
-        tz = tzidreplace[tz];
-      }
-      exDate.setParameter('tzid', tz);
-    }
     recurrence.push(exDate.toICALString());
   }
 
   for (var rDate of rDates){
-    if (rDate.getParameter('tzid')){
-      let tz = rDate.getParameter('tzid').toString();
-      if (tz in tzidreplace){
-        tz = tzidreplace[tz];
-      }
-      rDate.setParameter('tzid', tz);
-    }
     recurrence.push(rDate.toICALString());
   }
 
